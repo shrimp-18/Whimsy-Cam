@@ -65,7 +65,7 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 10000000;
   config.pixel_format = PIXFORMAT_RGB565;
-  config.frame_size = FRAMESIZE_SVGA;
+  config.frame_size = FRAMESIZE_QVGA;
   config.jpeg_quality = 12;
   config.fb_count = 1;
 
