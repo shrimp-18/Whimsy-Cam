@@ -1,12 +1,14 @@
 #define LGFX_USE_V1
-
 #include <LovyanGFX.hpp>
 #include <WiFi.h>
+#include <HTTPClient.h>
+
 const char* ssid = "WhimsyCam";
 const char* password = "12345678";
-
+const int buttonPin=2;
 const char* host = "192.168.4.1";
 const int port = 80;
+bool takePhoto = false;
 
 class LGFX : public lgfx::LGFX_Device
 {
@@ -66,10 +68,30 @@ public:
 
 LGFX tft;
 uint16_t lines[240*16];
+void capturePhoto()
+{
+    HTTPClient http;
+
+    http.begin("http://192.168.4.1/capture");
+
+    int code = http.GET();
+
+    if (code == HTTP_CODE_OK)
+    {
+        Serial.println("Photo saved!");
+    }
+    else
+    {
+        Serial.print("Capture failed. HTTP ");
+        Serial.println(code);
+    }
+
+    http.end();
+}
 void setup()
 {
   Serial.begin(115200);
-
+  pinMode(buttonPin, INPUT_PULLUP);
   tft.init();
   tft.setSwapBytes(false);
   tft.setRotation(0);
@@ -95,6 +117,18 @@ void setup()
 
 void loop()
 {
+  static bool lastState = HIGH;
+
+bool state = digitalRead(buttonPin);
+
+if (lastState == HIGH && state == LOW)
+{
+    takePhoto = true;
+}
+
+lastState = state;
+
+lastState = state;
     WiFiClient client;
 
     Serial.println("Connecting...");
@@ -111,7 +145,6 @@ void loop()
         "Host: 192.168.4.1\r\n"
         "Connection: close\r\n\r\n");
 
-    // Skip HTTP header
     String lineStr;
 
     while (true)
@@ -127,46 +160,43 @@ void loop()
 
 for (int blockY = 0; blockY < 240; blockY += 16)
 {
-    // Receive 16 full rows (320 pixels each)
-    uint8_t* ptr = (uint8_t*)lines;
-    int bytesLeft = 240 * 16 * 2;
+    
+   uint8_t* ptr = (uint8_t*)lines;
+   int bytesLeft = 240 * 16 * 2;
 
-    while (bytesLeft > 0)
+  while (bytesLeft > 0)
+  {
+    int n = client.read(ptr, bytesLeft);
+
+    if (n > 0)
     {
-        int n = client.read(ptr, bytesLeft);
-
-        if (n > 0)
-        {
-            ptr += n;
-            bytesLeft -= n;
-        }
+        ptr += n;
+        bytesLeft -= n;
     }
-
-    // Crop into a packed 240x16 buffer
-    static uint16_t cropped[240 * 16];
-
-    for (int r = 0; r < 16; r++)
-    {
-        memcpy(
-            &cropped[r * 240],
-            &lines[r * 320 + 40],
-            240 * sizeof(uint16_t)
-        );
-    }
+   }
 
     tft.pushImage(
-    0,
-    blockY,
-    240,
-    16,
-    lines
-);
+        0,
+        blockY,
+        240,
+        16,
+        lines
+    );
+
 }
 
-tft.endWrite();
+    tft.endWrite();
 
     client.stop();
 
-    Serial.println("Frame drawn");
+  if (takePhoto)
+  {
+      takePhoto = false;
+
+      Serial.println("Taking photo...");
+      capturePhoto();
+  }
+
+  Serial.println("Frame drawn");
 
 }
