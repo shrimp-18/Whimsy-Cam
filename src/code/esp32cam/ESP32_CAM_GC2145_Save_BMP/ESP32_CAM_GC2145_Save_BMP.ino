@@ -1,12 +1,14 @@
 #include <WiFi.h>
-#include <WebServer.h>
 #include "esp_camera.h"
 #include "FS.h"
 #include "SD_MMC.h"
 
 const char* ssid = "WhimsyCam";
 const char* password = "12345678";
-WebServer server(80);
+
+const int tcpPort = 80;
+WiFiServer tcpServer(tcpPort);
+WiFiClient tcpClient;
 
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
@@ -27,41 +29,40 @@ WebServer server(80);
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-void handleFrame()
+// --- Minimal binary protocol ---------------------------------------
+// Client sends a single command byte, server replies:
+//   CMD_FRAME   (0x01) -> raw 240x240 RGB565 bytes (115200 bytes), no header
+//   CMD_CAPTURE (0x02) -> saves a BMP to SD, replies with 1 status byte
+//                          (0x01 = ok, 0x00 = fail)
+// The connection is left open between commands so we never pay for a
+// fresh TCP handshake per frame.
+#define CMD_FRAME    0x01
+#define CMD_CAPTURE  0x02
+
+void sendFrame(WiFiClient &client)
 {
     camera_fb_t *fb = esp_camera_fb_get();
 
     if (!fb)
     {
-        server.send(500, "text/plain", "Capture failed");
+        // Nothing to stream - drop the connection so the client notices
+        // instead of blocking forever waiting for bytes that never come.
+        client.stop();
         return;
     }
-
-    WiFiClient client = server.client();
 
     const int srcWidth = 320;
     const int dstWidth = 240;
     const int height = 240;
-
-    const uint32_t outSize = dstWidth * height * 2;
-
-    client.printf(
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: application/octet-stream\r\n"
-        "Content-Length: %u\r\n"
-        "Connection: close\r\n\r\n",
-        outSize);
 
     uint16_t *pixels = (uint16_t *)fb->buf;
 
     for (int y = 0; y < height; y++)
     {
         client.write(
-            (uint8_t *)&pixels[y * srcWidth + 40],
+            (const uint8_t *)&pixels[y * srcWidth + 40],
             dstWidth * 2);
     }
-
-    client.flush();
 
     esp_camera_fb_return(fb);
 }
@@ -78,10 +79,8 @@ bool savePhotoBMP()
 
     static int photoNum = 1;
 
-   
-
-  char filename[32];
-  sprintf(filename, "/IMG%04d.bmp", photoNum++);
+    char filename[32];
+    sprintf(filename, "/IMG%04d.bmp", photoNum++);
 
     File file = SD_MMC.open(filename, FILE_WRITE);
 
@@ -150,8 +149,6 @@ bool savePhotoBMP()
         for (int x = 0; x < width; x++)
         {
             uint16_t p = pixels[y * width + x];
-
-            // Byte swap if needed
             p = (p >> 8) | (p << 8);
 
             uint8_t r = ((p >> 11) & 0x1F) << 3;
@@ -175,10 +172,45 @@ bool savePhotoBMP()
     Serial.print("Saved ");
     Serial.println(filename);
 
-    photoNum++;
-
     return true;
 }
+
+void handleTcp()
+{
+    // Accept a new client if we don't currently have one connected.
+    if (!tcpClient || !tcpClient.connected())
+    {
+        tcpClient = tcpServer.available();
+        return;
+    }
+
+    if (tcpClient.available() > 0)
+    {
+        uint8_t cmd = tcpClient.read();
+
+        switch (cmd)
+        {
+            case CMD_FRAME:
+                sendFrame(tcpClient);
+                break;
+
+            case CMD_CAPTURE:
+            {
+                bool ok = savePhotoBMP();
+                uint8_t resp = ok ? 0x01 : 0x00;
+                tcpClient.write(&resp, 1);
+                break;
+            }
+
+            default:
+                // Unknown command byte - drop the connection rather than
+                // risk getting permanently out of sync with the client.
+                tcpClient.stop();
+                break;
+        }
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -210,13 +242,9 @@ void setup()
     config.pin_reset = RESET_GPIO_NUM;
 
     config.xclk_freq_hz = 20000000;
-
     config.pixel_format = PIXFORMAT_RGB565;
-
     config.frame_size = FRAMESIZE_QVGA;
-
     config.jpeg_quality = 12;
-
     config.fb_count = 3;
 
     Serial.println("Initializing camera...");
@@ -232,14 +260,14 @@ void setup()
 
     Serial.println("Camera OK");
 
-        if (!SD_MMC.begin())
-        {
+    if (!SD_MMC.begin())
+    {
         Serial.println("SD Mount Failed");
         while (true)
             delay(1000);
-       }
+    }
 
-        Serial.println("SD Ready");
+    Serial.println("SD Ready");
 
     sensor_t *s = esp_camera_sensor_get();
 
@@ -261,22 +289,16 @@ void setup()
     Serial.print("Camera IP: ");
     Serial.println(WiFi.softAPIP());
 
-    server.on("/frame", HTTP_GET, handleFrame);
-    server.on("/capture", HTTP_GET, []()
-{
-    if (savePhotoBMP())
-        server.send(200, "text/plain", "OK");
-    else
-        server.send(500, "text/plain", "FAIL");
-});
+    tcpServer.begin();
+    tcpServer.setNoDelay(true); // disable Nagle - cuts per-write latency
 
-    server.begin();
     savePhotoBMP();
-    Serial.println("HTTP server started");
+
+    Serial.println("TCP server started");
     Serial.println("Ready!");
 }
 
 void loop()
 {
-    server.handleClient();
+    handleTcp();
 }
