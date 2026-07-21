@@ -15,7 +15,6 @@ WiFiClient tcpClient;
 #define XCLK_GPIO_NUM      0
 #define SIOD_GPIO_NUM     26
 #define SIOC_GPIO_NUM     27
-
 #define Y9_GPIO_NUM       35
 #define Y8_GPIO_NUM       34
 #define Y7_GPIO_NUM       39
@@ -24,20 +23,13 @@ WiFiClient tcpClient;
 #define Y4_GPIO_NUM       19
 #define Y3_GPIO_NUM       18
 #define Y2_GPIO_NUM        5
-
 #define VSYNC_GPIO_NUM    25
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
-
-// --- Minimal binary protocol ---------------------------------------
-// Client sends a single command byte, server replies:
-//   CMD_FRAME   (0x01) -> raw 240x240 RGB565 bytes (115200 bytes), no header
-//   CMD_CAPTURE (0x02) -> saves a BMP to SD, replies with 1 status byte
-//                          (0x01 = ok, 0x00 = fail)
-// The connection is left open between commands so we never pay for a
-// fresh TCP handshake per frame.
 #define CMD_FRAME    0x01
 #define CMD_CAPTURE  0x02
+uint8_t *frameBuffer = nullptr;
+const size_t frameBufferSize = 240 * 240 * 2;
 
 void sendFrame(WiFiClient &client)
 {
@@ -45,8 +37,13 @@ void sendFrame(WiFiClient &client)
 
     if (!fb)
     {
-        // Nothing to stream - drop the connection so the client notices
-        // instead of blocking forever waiting for bytes that never come.
+        client.stop();
+        return;
+    }
+
+    if (!frameBuffer)
+    {
+        esp_camera_fb_return(fb);
         client.stop();
         return;
     }
@@ -56,15 +53,15 @@ void sendFrame(WiFiClient &client)
     const int height = 240;
 
     uint16_t *pixels = (uint16_t *)fb->buf;
+    uint16_t *out = (uint16_t *)frameBuffer;
 
     for (int y = 0; y < height; y++)
     {
-        client.write(
-            (const uint8_t *)&pixels[y * srcWidth + 40],
-            dstWidth * 2);
+        memcpy(&out[y * dstWidth], &pixels[y * srcWidth + 40], dstWidth * 2);
     }
 
     esp_camera_fb_return(fb);
+    client.write(frameBuffer, frameBufferSize);
 }
 
 bool savePhotoBMP()
@@ -93,7 +90,6 @@ bool savePhotoBMP()
 
     const int width = 320;
     const int height = 240;
-
     const uint32_t rowSize = (width * 3 + 3) & ~3;
     const uint32_t imageSize = rowSize * height;
     const uint32_t fileSize = 54 + imageSize;
@@ -177,7 +173,6 @@ bool savePhotoBMP()
 
 void handleTcp()
 {
-    // Accept a new client if we don't currently have one connected.
     if (!tcpClient || !tcpClient.connected())
     {
         tcpClient = tcpServer.available();
@@ -203,8 +198,6 @@ void handleTcp()
             }
 
             default:
-                // Unknown command byte - drop the connection rather than
-                // risk getting permanently out of sync with the client.
                 tcpClient.stop();
                 break;
         }
@@ -259,6 +252,12 @@ void setup()
     }
 
     Serial.println("Camera OK");
+    frameBuffer = (uint8_t *)heap_caps_malloc(frameBufferSize, MALLOC_CAP_SPIRAM);
+    if (!frameBuffer)
+        frameBuffer = (uint8_t *)malloc(frameBufferSize);
+
+    if (!frameBuffer)
+        Serial.println("WARNING: frame buffer allocation failed!");
 
     if (!SD_MMC.begin())
     {
@@ -285,12 +284,13 @@ void setup()
     Serial.println("Starting AP...");
 
     WiFi.softAP(ssid, password);
+    WiFi.setSleep(false);
 
     Serial.print("Camera IP: ");
     Serial.println(WiFi.softAPIP());
 
     tcpServer.begin();
-    tcpServer.setNoDelay(true); // disable Nagle - cuts per-write latency
+    tcpServer.setNoDelay(true);
 
     savePhotoBMP();
 

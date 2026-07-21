@@ -61,7 +61,12 @@ public:
 };
 
 LGFX tft;
-uint16_t lines[240 * 16];
+
+// Whole-frame buffer (240x240 RGB565 = 115200 bytes). Reading and
+// pushing the full frame in one shot instead of 15 small chunks cuts
+// per-call overhead on both the network read and the SPI push.
+uint16_t frameBuf[240 * 240];
+const size_t frameBufBytes = sizeof(frameBuf);
 
 // Connects once and stays connected. Only reconnects if the socket
 // has actually dropped - this is what avoids paying for a fresh TCP
@@ -104,16 +109,13 @@ bool requestFrame()
     uint8_t cmd = CMD_FRAME;
     client.write(&cmd, 1);
 
+    // One big read instead of 15 chunked ones.
+    if (!readExact((uint8_t *)frameBuf, frameBufBytes))
+        return false;
+
+    // One big SPI push instead of 15 chunked ones.
     tft.startWrite();
-    for (int blockY = 0; blockY < 240; blockY += 16)
-    {
-        if (!readExact((uint8_t *)lines, sizeof(lines)))
-        {
-            tft.endWrite();
-            return false;
-        }
-        tft.pushImage(0, blockY, 240, 16, lines);
-    }
+    tft.pushImage(0, 0, 240, 240, frameBuf);
     tft.endWrite();
     return true;
 }
@@ -149,7 +151,7 @@ void setup()
     }
     Serial.println();
     Serial.println("Connected!");
-
+    WiFi.setSleep(false);
     tft.fillScreen(TFT_GREEN);
     tft.drawString("WiFi OK", 60, 110);
 }
