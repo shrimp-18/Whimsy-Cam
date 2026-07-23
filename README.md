@@ -4,6 +4,9 @@ WhimsyCam is a small and lightweight keychain camera that lets you capture every
 
 ---
 
+<img width="420" height="595" alt="A5 - 1" src="https://github.com/user-attachments/assets/da4e179a-858f-4fa9-84b7-981f21dc4146" />
+
+
 ## How to Use:
 Whimsy Cam is supa simple to use! Just charge it every once in a while, turn it on and click photos! It comes with s 64gb SD-Card, that means LOTSSSS of photos. It is designed to let you attach cute lanyards and charms to it :3 Keep checking this repository often! If there are updates, you can simply update the firmware of your camera too without touching the hardware or opening anything up. 
 
