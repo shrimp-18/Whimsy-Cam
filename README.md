@@ -89,8 +89,6 @@ YAY DAS IT ITS DONE
 
 ## Bill of Materials
 
-## Bill of Materials
-
 | S.No. | Product Name | Note | Qty | Cost (INR) | Link |
 |-------|--------------|------|-----|------------|------|
 | 1 | ESP32 S3 N16R8 | | 1 | 1249 | https://robocraze.com/products/7semi-esp32-s3-dev-boardc-1-n8r8-wifi-bluetooth-dual-usb-c-rgb-led |
