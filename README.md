@@ -4,7 +4,21 @@ WhimsyCam is a small and lightweight keychain camera that lets you capture every
 
 ---
 
+
+
 <img width="420" height="595" alt="A5 - 1" src="https://github.com/user-attachments/assets/da4e179a-858f-4fa9-84b7-981f21dc4146" />
+
+
+**FEATURES** :
++ 2 MEGAPIXEL CAMERA
++ 10FPS FULL COLOUR DISPLAY
++ USB-C CHARGING
++ LONG BATTERY LIFE
++ IN-BUILT FLASH
++ KEYCHAIN/CHARM LANYARD HOLE
++ STURDY CASE
++ EASY SOFTWARE UPDATES
+  
 
 
 ## How to Use:
@@ -12,6 +26,7 @@ Whimsy Cam is supa simple to use! Just charge it every once in a while, turn it 
 
 <img width="382" height="301" alt="image" src="https://github.com/user-attachments/assets/40e89dd7-2e2d-4456-8b0e-a2cf792bf7da" />
 <img width="371" height="287" alt="image" src="https://github.com/user-attachments/assets/f1b7b203-121b-414b-a6df-6bb51cc79565" />
+
 ---
 
 ## Why I made this:
@@ -67,23 +82,29 @@ So did I finally convince you to make your own :3 <br>
 7.Make cute lanyards and beaded chains to put on the camera so you can carry it around and be a cool kid. Cool because you have a keychain camera and because YOU MADE IT!<br>
 
 YAY DAS IT ITS DONE
+<img width="842" height="595" alt="idea" src="https://github.com/user-attachments/assets/dab57349-09af-4757-9641-f3efe7d35a97" />
+
 
 ---
 
 ## Bill of Materials
 
+## Bill of Materials
+
 | S.No. | Product Name | Note | Qty | Cost (INR) | Link |
 |-------|--------------|------|-----|------------|------|
-| 1 | ESP32 S3 N16R8 | | 1 | 1249 | [Link](https://robocraze.com/products/7semi-esp32-s3-dev-boardc-1-n8r8-wifi-bluetooth-dual-usb-c-rgb-led) |
-| 2 | TPS61023 | | 1 | 109 | [Link](https://robocraze.com/products/tps61023-3-7a-5v-output-mini-boost-converter-breakout-board-7semi) |
-| 3 | TP4056 | | 1 | 19 | [Link](https://robocraze.com/products/tp4056-battery-charger-c-type-module-with-protection-1) |
-| 4 | LiPo Battery | | 1 | 102 | [Link](https://robocraze.com/products/witty-fox-160mah-rechargeable-3-7v-lipo-battery) |
-| 5 | Slide Switch | | 1 | 16 | [Link](https://robocraze.com/products/slide-switch-3-pin-2-way-spdt) |
-| 6 | Tactile Button | 6x6mm | 1 | 29 | [Link](https://robocraze.com/products/4-pins-dip-momentary-square-tactile-push-button-switch-10-pieces-6x6x5mm) |
-| 7 | GC9A01 TFT Screen | | 1 | 422 | [Link](https://www.xcluma.com/1-28-inch-round-screen-tft-module-240x240-hd-ips-full) |
-| 8 | ESP32 Cam Module | GC2145 Sensor | 1 | 699 | [Link](https://quartzcomponents.com/products/esp32-camera-development-board-wifi-bluetooth-with-ov2640-camera-module) |
-| 9 | ESP32 Cam MB | | 1 | 82 | [Link](https://quartzcomponents.com/products/esp32-cam-mb-micro-usb-programmer-module-for-esp32-cam-development-board) |
-| 10 | SD Card | 64GB | 1 | 1605 | [Link](https://quartzcomponents.com/products/sandisk-ultra-64gb-microsdxc-class-10-memory-card-140mb-s) |
+| 1 | ESP32 S3 N16R8 | | 1 | 1249 | https://robocraze.com/products/7semi-esp32-s3-dev-boardc-1-n8r8-wifi-bluetooth-dual-usb-c-rgb-led |
+| 2 | TPS61023 | | 1 | 109 | https://robocraze.com/products/tps61023-3-7a-5v-output-mini-boost-converter-breakout-board-7semi |
+| 3 | TP4056 | | 1 | 19 | https://robocraze.com/products/tp4056-battery-charger-c-type-module-with-protection-1 |
+| 4 | LiPo Battery | | 1 | 102 | https://robocraze.com/products/witty-fox-160mah-rechargeable-3-7v-lipo-battery |
+| 5 | Slide Switch | | 1 | 16 | https://robocraze.com/products/slide-switch-3-pin-2-way-spdt |
+| 6 | Tactile Button | 6x6mm | 1 | 29 | https://robocraze.com/products/4-pins-dip-momentary-square-tactile-push-button-switch-10-pieces-6x6x5mm |
+| 7 | GC9A01 TFT Screen | | 1 | 422 | https://www.xcluma.com/1-28-inch-round-screen-tft-module-240x240-hd-ips-full |
+| 8 | ESP32 Cam Module | GC2145 Sensor | 1 | 699 | https://quartzcomponents.com/products/esp32-camera-development-board-wifi-bluetooth-with-ov2640-camera-module |
+| 9 | ESP32 Cam MB | | 1 | 82 | https://quartzcomponents.com/products/esp32-cam-mb-micro-usb-programmer-module-for-esp32-cam-development-board |
+| 10 | SD Card | 64GB | 1 | 1605 | https://quartzcomponents.com/products/sandisk-ultra-64gb-microsdxc-class-10-memory-card-140mb-s |
+| 11 | 3D Case - Back | | 1 | 95 | https://zbotic.in/product/online-3d-printing-service/ |
+| 12 | 3D Case - Front | | 1 | 93 | https://zbotic.in/product/online-3d-printing-service/ |
 
-**Total: 10 items — ₹4332 (~$45 USD)**
+**Total: 12 items — ₹4520 (~$47 USD)**
 
