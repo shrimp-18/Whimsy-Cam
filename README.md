@@ -37,7 +37,9 @@ A re-chargable LiPo battery that outputs 3.7V is used. Since the ESP 32 modules 
 ---
 
 ## The Wiring Diagram:
-<img width="842" height="595" alt="wiringdiag" src="https://github.com/user-attachments/assets/f592c90d-eb96-4e82-a692-a88517dab7f4" />
+<img width="842" height="595" alt="wiringdiagram" src="https://github.com/user-attachments/assets/b3c9e809-e075-4ed3-8ee0-27049ba9535d" />
+
+
 
 ## The Case:
 <img width="288" height="232" alt="image" src="https://github.com/user-attachments/assets/276ffcf9-bbc6-4d8c-a9e7-72f751e52b58" />
