@@ -7,6 +7,8 @@ WhimsyCam is a small and lightweight keychain camera that lets you capture every
 
 
 <img width="420" height="595" alt="A5 - 1" src="https://github.com/user-attachments/assets/da4e179a-858f-4fa9-84b7-981f21dc4146" />
+<img width="4096" height="3072" alt="1000110422" src="https://github.com/user-attachments/assets/66e6f53b-ea5e-4c61-80eb-e8c6a6857649" />
+<img width="3072" height="4096" alt="1000110426" src="https://github.com/user-attachments/assets/c6d8d8c2-703f-4ed4-ba67-82e0302014b8" />
 
 
 **FEATURES** :
